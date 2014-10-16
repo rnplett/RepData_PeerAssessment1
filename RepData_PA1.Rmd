@@ -1,0 +1,67 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+html_document:
+keep_md: true
+---
+
+
+## Loading and preprocessing the data
+
+
+```{r}
+
+ActivityRaw <- read.csv(unzip("activity.zip"))
+Activity <- ActivityRaw[!is.na(ActivityRaw$steps),]
+
+```
+
+## What is mean total number of steps taken per day?
+
+
+```{r}
+
+StepsPerDay <- tapply(Activity$steps,Activity$date,sum)
+MeanStepsPerDay <- mean(StepsPerDay, na.rm = TRUE)
+MeanStepsPerDay <- format(as.integer(MeanStepsPerDay),big.mark = ",")
+MeanStepsPerDay
+
+```
+
+The mean total number of steps taken per day is `r MeanStepsPerDay`.
+
+## What is the average daily activity pattern?
+
+```{r}
+
+require(ggplot2)
+require(lubridate)
+
+Steps <- tapply(Activity$steps,Activity$interval,mean)
+Time <- minutes(as.integer(rownames(Steps)))
+Time <- as.POSIXct(Time,format="%H:%M",origin = today())
+MeanStepsPerInterval <- data.frame(time=Time,steps=Steps)
+ggplot(MeanStepsPerInterval,
+       aes(x=time,y=steps,group="")) + 
+        geom_line() +
+        geom_point() +
+        xlab("Time") + ylab("Steps") + 
+        ggtitle("Average Number of Steps per 5 Minute Interval") +
+        theme_bw()
+
+```
+
+## Imputing missing values
+
+```{r}
+
+
+```
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+```{r}
+
+
+```
+
