@@ -9,31 +9,33 @@ keep_md: true
 ## Loading and preprocessing the data
 
 
-```{r}
 
+```r
 ActivityRaw <- read.csv(unzip("activity.zip"))
 Activity <- ActivityRaw[!is.na(ActivityRaw$steps),]
-
 ```
 
 ## What is mean total number of steps taken per day?
 
 
-```{r}
 
+```r
 StepsPerDay <- tapply(Activity$steps,Activity$date,sum)
 MeanStepsPerDay <- mean(StepsPerDay, na.rm = TRUE)
 MeanStepsPerDay <- format(as.integer(MeanStepsPerDay),big.mark = ",")
 MeanStepsPerDay
-
 ```
 
-The mean total number of steps taken per day is `r MeanStepsPerDay`.
+```
+## [1] "10,766"
+```
+
+The mean total number of steps taken per day is 10,766.
 
 ## What is the average daily activity pattern?
 
-```{r}
 
+```r
 AvgStepsPerInterval <- as.ts(tapply(Activity$steps,Activity$interval,mean))
 par(xaxt = "n")
 ts.plot(AvgStepsPerInterval,type="l",
@@ -42,52 +44,55 @@ ts.plot(AvgStepsPerInterval,type="l",
         ylab = "Average Steps per Interval")
 par(xaxt = "s")
 axis(1,at=seq(0,288,36), labels=c("12am","3am","6am","9am","12pm","3pm","6pm","9pm","12am"))
-
 ```
 
-```{r}
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
 
+
+```r
 MaxSteps <- max(AvgStepsPerInterval)
 MaxInterval <- names(AvgStepsPerInterval[AvgStepsPerInterval==MaxSteps])
 MaxSteps <- as.integer(MaxSteps)
 
 PadText <- gsub("^(.*)","000\\1",MaxInterval)
 MaxTime <- gsub(".*(..)(..)$","\\1:\\2",PadText)
-
 ```
 
-The maximum average number of steps in a 5 minute interval is <strong>`r MaxSteps`</strong>
+The maximum average number of steps in a 5 minute interval is <strong>206</strong>
 
-This maximum occured at <strong>`r MaxTime`</strong>
+This maximum occured at <strong>08:35</strong>
 
 ## Imputing missing values
 
-```{r}
 
+```r
 NAIntervals <- is.na(ActivityRaw$steps)
 NumberOfNAs <- format(sum(NAIntervals),big.mark = ",")
 PercentMissing <- format(mean(NAIntervals)*100,digits = 4)
-
 ```
 
-The number of rows in the data set with missing values is <strong>`r NumberOfNAs`</strong>
-or <strong>`r PercentMissing`%</strong>.
+The number of rows in the data set with missing values is <strong>2,304</strong>
+or <strong>13.11%</strong>.
 
 These missing values will be replaced by the average of all other values in the same
 time interval.
 
-```{r}
 
+```r
 ActivityFix <- ActivityRaw
 
 ActivityFix$steps[NAIntervals] <- AvgStepsPerInterval[ActivityFix$interval[NAIntervals]]
+```
 
-
+```
+## Warning: number of items to replace is not a multiple of replacement
+## length
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r}
+
+```r
 require(reshape2)
 require(ggplot2)
 
@@ -102,6 +107,7 @@ ActivityDayWk$WeekPart <- as.factor(ActivityDayWk$WeekPart)
 x <- dcast(ActivityDayWk, interval ~ WeekPart,value.var="steps",mean)
 x <- melt(x,id.vars = c("interval"))
 ggplot(x,aes(interval,value)) + geom_line() +facet_wrap( ~ variable, ncol = 1)
-
 ```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
